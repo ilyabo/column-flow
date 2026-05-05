@@ -16,11 +16,14 @@ const accessors = {
   linkTargetId: "target"
 } as const;
 
+type BadgeMode = "directional" | "total" | "none";
+
 export function App() {
   const [data, setData] = useState<ExampleData>();
   const [loadError, setLoadError] = useState<string>();
   const [selectedNodeId, setSelectedNodeId] = useState<string>();
   const [selectedLinkId, setSelectedLinkId] = useState<string>();
+  const [badgeMode, setBadgeMode] = useState<BadgeMode>("directional");
 
   useEffect(() => {
     let isMounted = true;
@@ -46,14 +49,28 @@ export function App() {
   const relationships = data?.relationships ?? [];
   const selectedNode = companies.find((company) => company.id === selectedNodeId);
   const selectedLink = relationships.find((link) => link.id === selectedLinkId);
-  const degreeByNode = useMemo(() => {
-    const counts = new Map<string, number>();
+  const connectionCounts = useMemo(() => {
+    const counts = new Map<string, {incoming: number; outgoing: number}>();
+    const ensureCounts = (nodeId: string) => {
+      const existing = counts.get(nodeId);
+      if (existing) return existing;
+      const nextCounts = {incoming: 0, outgoing: 0};
+      counts.set(nodeId, nextCounts);
+      return nextCounts;
+    };
+
+    companies.forEach((company) => {
+      ensureCounts(company.id);
+    });
     relationships.forEach((link) => {
-      counts.set(link.source, (counts.get(link.source) ?? 0) + 1);
-      counts.set(link.target, (counts.get(link.target) ?? 0) + 1);
+      ensureCounts(link.source).outgoing += 1;
+      ensureCounts(link.target).incoming += 1;
     });
     return counts;
-  }, [relationships]);
+  }, [companies, relationships]);
+  const selectedNodeCounts = selectedNodeId
+    ? connectionCounts.get(selectedNodeId)
+    : undefined;
 
   return (
     <main className="min-h-screen bg-[#f4f7fb] text-[#263645]">
@@ -96,7 +113,8 @@ export function App() {
               renderNode={(context) => (
                 <CompanyNodeView
                   context={context}
-                  degree={degreeByNode.get(context.layout.id) ?? 0}
+                  connections={connectionCounts.get(context.layout.id)}
+                  badgeMode={badgeMode}
                 />
               )}
             />
@@ -157,9 +175,45 @@ export function App() {
             )}
           </div>
 
+          <div className="mt-5">
+            <p className="text-xs font-medium text-slate-500">Node badges</p>
+            <div className="mt-2 grid grid-cols-3 rounded-md border border-slate-200 bg-slate-50 p-1 text-sm">
+              {(["directional", "total", "none"] as const).map((mode) => (
+                <button
+                  className={[
+                    "rounded px-2 py-1.5 font-medium transition-colors",
+                    badgeMode === mode
+                      ? "bg-white text-[#263645] shadow-sm"
+                      : "text-slate-500 hover:text-[#263645]"
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  key={mode}
+                  type="button"
+                  onClick={() => setBadgeMode(mode)}
+                >
+                  {mode === "directional"
+                    ? "In / out"
+                    : mode === "total"
+                      ? "Total"
+                      : "Off"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
-            <Metric label="Nodes" value={companies.length} />
-            <Metric label="Links" value={relationships.length} />
+            {selectedNodeCounts ? (
+              <>
+                <Metric label="Incoming" value={selectedNodeCounts.incoming} />
+                <Metric label="Outgoing" value={selectedNodeCounts.outgoing} />
+              </>
+            ) : (
+              <>
+                <Metric label="Nodes" value={companies.length} />
+                <Metric label="Links" value={relationships.length} />
+              </>
+            )}
           </div>
         </aside>
       </div>
@@ -169,20 +223,47 @@ export function App() {
 
 function CompanyNodeView({
   context,
-  degree
+  connections,
+  badgeMode
 }: {
   context: ColumnFlowNodeRenderContext<CompanyNode, Stage>;
-  degree: number;
+  connections: {incoming: number; outgoing: number} | undefined;
+  badgeMode: BadgeMode;
 }) {
   const textColor = context.node.stage === "refining" ? "text-[#263645]" : "text-white";
+  const incoming = connections?.incoming ?? 0;
+  const outgoing = connections?.outgoing ?? 0;
+  const degree = (connections?.incoming ?? 0) + (connections?.outgoing ?? 0);
+  const badgeColor =
+    context.node.stage === "refining" ? "bg-black/10 text-[#263645]" : "bg-white/25";
+  const badgeClass = `rounded-sm px-1.5 py-0.5 text-[10px] leading-none ${badgeColor}`;
+
+  if (badgeMode === "none") {
+    return (
+      <span className={`block w-full truncate ${textColor}`}>
+        {context.node.name}
+      </span>
+    );
+  }
+
+  if (badgeMode === "directional") {
+    return (
+      <span className={`grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 ${textColor}`}>
+        <span className={badgeClass} title="Incoming connections">
+          {incoming}
+        </span>
+        <span className="truncate">{context.node.name}</span>
+        <span className={badgeClass} title="Outgoing connections">
+          {outgoing}
+        </span>
+      </span>
+    );
+  }
+
   return (
     <span className={`flex w-full items-center justify-between gap-2 ${textColor}`}>
       <span className="truncate">{context.node.name}</span>
-      {context.node.tone === "accent" ? (
-        <span className="rounded-sm bg-white/25 px-1.5 py-0.5 text-[10px] leading-none">
-          {degree}
-        </span>
-      ) : null}
+      <span className={badgeClass}>{degree}</span>
     </span>
   );
 }
