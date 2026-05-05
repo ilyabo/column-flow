@@ -1,0 +1,14 @@
+id,stage,name,country,summary,tone
+northstar,production,Northstar Offshore,Norway,Synthetic offshore operator producing medium crude blends,
+canyon,production,Canyon Basin Energy,United States,Onshore producer feeding pipeline networks and coastal terminals,accent
+delta,production,Delta Shelf Partners,Brazil,Deepwater crude producer with export terminal capacity,
+transgulf,transport,TransGulf Pipeline,United States,Regional pipeline network moving crude to refinery hubs,
+bluewater,transport,Bluewater Tankers,Singapore,Marine carrier linking export terminals with coastal refineries,
+harborgrid,transport,Harborgrid Storage,Netherlands,Terminal operator blending and storing crude cargoes,
+riverbend,refining,Riverbend Refining,United Kingdom,Refinery producing gasoline diesel and aviation fuel,accent
+sundial,refining,Sundial Petrochem,Spain,Integrated refinery and petrochemical complex,
+pacific,refining,Pacific Hydrocrack,Japan,Refiner focused on low-sulfur transport fuels,
+metro,markets,MetroFuel Retail,France,Retail fuel network supplied by regional refineries,accent
+skyport,markets,Skyport Aviation,United Arab Emirates,Airport fuel buyer sourcing jet fuel contracts,
+polymer,markets,PolymerWorks,Germany,Petrochemical manufacturer using naphtha feedstock,
+coastline,markets,Coastline Diesel,Canada,Wholesale distributor serving fleet fuel contracts,

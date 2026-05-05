@@ -1,149 +1,9 @@
-import { ColumnFlow, type ColumnFlowNodeRenderContext } from "column-flow";
-import { Info, RotateCcw } from "lucide-react";
-import type { CSSProperties } from "react";
-import { useMemo, useState } from "react";
-
-type Stage = {
-  id: string;
-  label: string;
-  color: string;
-};
-
-type CompanyNode = {
-  id: string;
-  stage: string;
-  name: string;
-  country: string;
-  summary: string;
-  tone?: "muted" | "accent";
-};
-
-type TradeLink = {
-  id: string;
-  source: string;
-  target: string;
-  commodity: string;
-};
-
-const stages: Stage[] = [
-  {id: "production", label: "Crude production", color: "#0f766e"},
-  {id: "transport", label: "Pipeline & shipping", color: "#7c3aed"},
-  {id: "refining", label: "Refining", color: "#f2c14e"},
-  {id: "markets", label: "Fuel markets", color: "#2563eb"}
-];
-
-const companies: CompanyNode[] = [
-  {
-    id: "northstar",
-    stage: "production",
-    name: "Northstar Offshore",
-    country: "Norway",
-    summary: "Synthetic offshore operator producing medium crude blends."
-  },
-  {
-    id: "canyon",
-    stage: "production",
-    name: "Canyon Basin Energy",
-    country: "United States",
-    summary: "Onshore producer feeding pipeline networks and coastal terminals.",
-    tone: "accent"
-  },
-  {
-    id: "delta",
-    stage: "production",
-    name: "Delta Shelf Partners",
-    country: "Brazil",
-    summary: "Deepwater crude producer with export terminal capacity."
-  },
-  {
-    id: "transgulf",
-    stage: "transport",
-    name: "TransGulf Pipeline",
-    country: "United States",
-    summary: "Regional pipeline network moving crude to refinery hubs."
-  },
-  {
-    id: "bluewater",
-    stage: "transport",
-    name: "Bluewater Tankers",
-    country: "Singapore",
-    summary: "Marine carrier linking export terminals with coastal refineries."
-  },
-  {
-    id: "harborgrid",
-    stage: "transport",
-    name: "Harborgrid Storage",
-    country: "Netherlands",
-    summary: "Terminal operator blending and storing crude cargoes."
-  },
-  {
-    id: "riverbend",
-    stage: "refining",
-    name: "Riverbend Refining",
-    country: "United Kingdom",
-    summary: "Refinery producing gasoline, diesel, and aviation fuel.",
-    tone: "accent"
-  },
-  {
-    id: "sundial",
-    stage: "refining",
-    name: "Sundial Petrochem",
-    country: "Spain",
-    summary: "Integrated refinery and petrochemical complex."
-  },
-  {
-    id: "pacific",
-    stage: "refining",
-    name: "Pacific Hydrocrack",
-    country: "Japan",
-    summary: "Refiner focused on low-sulfur transport fuels."
-  },
-  {
-    id: "metro",
-    stage: "markets",
-    name: "MetroFuel Retail",
-    country: "France",
-    summary: "Retail fuel network supplied by regional refineries.",
-    tone: "accent"
-  },
-  {
-    id: "skyport",
-    stage: "markets",
-    name: "Skyport Aviation",
-    country: "United Arab Emirates",
-    summary: "Airport fuel buyer sourcing jet fuel contracts."
-  },
-  {
-    id: "polymer",
-    stage: "markets",
-    name: "PolymerWorks",
-    country: "Germany",
-    summary: "Petrochemical manufacturer using naphtha feedstock."
-  },
-  {
-    id: "coastline",
-    stage: "markets",
-    name: "Coastline Diesel",
-    country: "Canada",
-    summary: "Wholesale distributor serving fleet fuel contracts."
-  }
-];
-
-const relationships: TradeLink[] = [
-  {id: "canyon-transgulf", source: "canyon", target: "transgulf", commodity: "Light sweet crude"},
-  {id: "canyon-harborgrid", source: "canyon", target: "harborgrid", commodity: "Pipeline blend"},
-  {id: "northstar-bluewater", source: "northstar", target: "bluewater", commodity: "North Sea crude"},
-  {id: "delta-bluewater", source: "delta", target: "bluewater", commodity: "Deepwater crude"},
-  {id: "transgulf-riverbend", source: "transgulf", target: "riverbend", commodity: "Crude delivery"},
-  {id: "bluewater-riverbend", source: "bluewater", target: "riverbend", commodity: "Seaborne crude"},
-  {id: "bluewater-sundial", source: "bluewater", target: "sundial", commodity: "Seaborne crude"},
-  {id: "harborgrid-pacific", source: "harborgrid", target: "pacific", commodity: "Blended feedstock"},
-  {id: "riverbend-metro", source: "riverbend", target: "metro", commodity: "Gasoline"},
-  {id: "riverbend-skyport", source: "riverbend", target: "skyport", commodity: "Jet fuel"},
-  {id: "riverbend-coastline", source: "riverbend", target: "coastline", commodity: "Diesel"},
-  {id: "sundial-polymer", source: "sundial", target: "polymer", commodity: "Naphtha"},
-  {id: "pacific-skyport", source: "pacific", target: "skyport", commodity: "Jet fuel"}
-];
+import {ColumnFlow, type ColumnFlowNodeRenderContext} from "column-flow";
+import {Info, RotateCcw} from "lucide-react";
+import type {CSSProperties} from "react";
+import {useEffect, useMemo, useState} from "react";
+import {loadExampleData, type ExampleData} from "./loadCsvData";
+import type {CompanyNode, Stage} from "./types";
 
 const accessors = {
   columnId: "id",
@@ -157,9 +17,33 @@ const accessors = {
 } as const;
 
 export function App() {
+  const [data, setData] = useState<ExampleData>();
+  const [loadError, setLoadError] = useState<string>();
   const [selectedNodeId, setSelectedNodeId] = useState<string>();
   const [selectedLinkId, setSelectedLinkId] = useState<string>();
 
+  useEffect(() => {
+    let isMounted = true;
+    loadExampleData()
+      .then((nextData) => {
+        if (isMounted) {
+          setData(nextData);
+        }
+      })
+      .catch((error: unknown) => {
+        if (isMounted) {
+          setLoadError(error instanceof Error ? error.message : String(error));
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const stages = data?.stages ?? [];
+  const companies = data?.companies ?? [];
+  const relationships = data?.relationships ?? [];
   const selectedNode = companies.find((company) => company.id === selectedNodeId);
   const selectedLink = relationships.find((link) => link.id === selectedLinkId);
   const degreeByNode = useMemo(() => {
@@ -169,46 +53,58 @@ export function App() {
       counts.set(link.target, (counts.get(link.target) ?? 0) + 1);
     });
     return counts;
-  }, []);
+  }, [relationships]);
 
   return (
     <main className="min-h-screen bg-[#f4f7fb] text-[#263645]">
       <div className="flex min-h-screen flex-col gap-4 p-4 lg:flex-row">
         <section className="min-h-[620px] flex-1 overflow-hidden rounded-md border border-slate-200 bg-[#f4f7fb] shadow-sm">
-          <ColumnFlow
-            columns={stages}
-            nodes={companies}
-            links={relationships}
-            accessors={accessors}
-            style={
-              {
-                "--column-flow-background": "#f4f7fb",
-                "--column-flow-text": "#263645",
-                "--column-flow-link": "#64748b",
-                "--column-flow-link-dimmed": "#d8dee8",
-                "--column-flow-selected": "#1f2a44"
-              } as CSSProperties
-            }
-            selectedNodeId={selectedNodeId}
-            onSelectedNodeIdChange={setSelectedNodeId}
-            onNodeClick={() => {
-              setSelectedLinkId(undefined);
-            }}
-            onLinkClick={({linkId}) => setSelectedLinkId(linkId)}
-            onCanvasClick={() => {
-              setSelectedNodeId(undefined);
-              setSelectedLinkId(undefined);
-            }}
-            getColumnColor={(stage) => stage.color}
-            getNodeColor={(node) => stages.find((stage) => stage.id === node.stage)?.color ?? "#51606f"}
-            nodeSort={(left, right) => right.degree - left.degree}
-            renderNode={(context) => (
-              <CompanyNode
-                context={context}
-                degree={degreeByNode.get(context.layout.id) ?? 0}
-              />
-            )}
-          />
+          {loadError ? (
+            <div className="flex h-full min-h-[620px] items-center justify-center p-8 text-sm text-red-700">
+              Failed to load CSV data: {loadError}
+            </div>
+          ) : data ? (
+            <ColumnFlow
+              columns={stages}
+              nodes={companies}
+              links={relationships}
+              accessors={accessors}
+              style={
+                {
+                  "--column-flow-background": "#f4f7fb",
+                  "--column-flow-text": "#263645",
+                  "--column-flow-link": "#64748b",
+                  "--column-flow-link-dimmed": "#d8dee8",
+                  "--column-flow-selected": "#1f2a44"
+                } as CSSProperties
+              }
+              selectedNodeId={selectedNodeId}
+              onSelectedNodeIdChange={setSelectedNodeId}
+              onNodeClick={() => {
+                setSelectedLinkId(undefined);
+              }}
+              onLinkClick={({linkId}) => setSelectedLinkId(linkId)}
+              onCanvasClick={() => {
+                setSelectedNodeId(undefined);
+                setSelectedLinkId(undefined);
+              }}
+              getColumnColor={(stage) => stage.color}
+              getNodeColor={(node) =>
+                stages.find((stage) => stage.id === node.stage)?.color ?? "#51606f"
+              }
+              nodeSort={(left, right) => right.degree - left.degree}
+              renderNode={(context) => (
+                <CompanyNodeView
+                  context={context}
+                  degree={degreeByNode.get(context.layout.id) ?? 0}
+                />
+              )}
+            />
+          ) : (
+            <div className="flex h-full min-h-[620px] items-center justify-center p-8 text-sm text-slate-600">
+              Loading CSV data...
+            </div>
+          )}
         </section>
 
         <aside className="w-full rounded-md border border-slate-200 bg-white p-5 shadow-sm lg:w-96">
@@ -238,13 +134,16 @@ export function App() {
             {selectedNode ? (
               <DetailBlock
                 title={selectedNode.name}
-                meta={`${stageLabel(selectedNode.stage)} / ${selectedNode.country}`}
+                meta={`${stageLabel(stages, selectedNode.stage)} / ${selectedNode.country}`}
                 body={selectedNode.summary}
               />
             ) : selectedLink ? (
               <DetailBlock
                 title={selectedLink.commodity}
-                meta={`${nameFor(selectedLink.source)} -> ${nameFor(selectedLink.target)}`}
+                meta={`${nameFor(companies, selectedLink.source)} -> ${nameFor(
+                  companies,
+                  selectedLink.target
+                )}`}
                 body="Link click events expose the original link object, source node, target node, and layout geometry."
               />
             ) : (
@@ -268,7 +167,7 @@ export function App() {
   );
 }
 
-function CompanyNode({
+function CompanyNodeView({
   context,
   degree
 }: {
@@ -299,9 +198,7 @@ function DetailBlock({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase text-slate-500">
-        {meta}
-      </p>
+      <p className="text-xs font-semibold uppercase text-slate-500">{meta}</p>
       <h2 className="mt-1 text-xl font-semibold">{title}</h2>
       <p className="mt-3 text-sm leading-6 text-slate-600">{body}</p>
     </div>
@@ -317,10 +214,10 @@ function Metric({label, value}: {label: string; value: number}) {
   );
 }
 
-function stageLabel(stageId: string) {
+function stageLabel(stages: Stage[], stageId: string) {
   return stages.find((stage) => stage.id === stageId)?.label ?? stageId;
 }
 
-function nameFor(companyId: string) {
+function nameFor(companies: CompanyNode[], companyId: string) {
   return companies.find((company) => company.id === companyId)?.name ?? companyId;
 }

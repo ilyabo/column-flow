@@ -1,0 +1,14 @@
+id,source,target,commodity
+canyon-transgulf,canyon,transgulf,Light sweet crude
+canyon-harborgrid,canyon,harborgrid,Pipeline blend
+northstar-bluewater,northstar,bluewater,North Sea crude
+delta-bluewater,delta,bluewater,Deepwater crude
+transgulf-riverbend,transgulf,riverbend,Crude delivery
+bluewater-riverbend,bluewater,riverbend,Seaborne crude
+bluewater-sundial,bluewater,sundial,Seaborne crude
+harborgrid-pacific,harborgrid,pacific,Blended feedstock
+riverbend-metro,riverbend,metro,Gasoline
+riverbend-skyport,riverbend,skyport,Jet fuel
+riverbend-coastline,riverbend,coastline,Diesel
+sundial-polymer,sundial,polymer,Naphtha
+pacific-skyport,pacific,skyport,Jet fuel
