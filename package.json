@@ -11,8 +11,14 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev --filter=column-flow-react-vite",
+    "publish:dry-run": "npm publish --workspace column-flow --dry-run",
+    "publish:npm": "npm publish --workspace column-flow --access public",
     "test": "turbo test",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "version:bump": "npm version --workspace column-flow",
+    "version:major": "npm version major --workspace column-flow",
+    "version:minor": "npm version minor --workspace column-flow",
+    "version:patch": "npm version patch --workspace column-flow"
   },
   "devDependencies": {
     "@types/react": "^19.2.7",

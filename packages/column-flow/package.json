@@ -27,8 +27,15 @@
   "scripts": {
     "build": "tsc && cp src/column-flow.css dist/column-flow.css",
     "dev": "tsc -w",
+    "prepublishOnly": "pnpm run build",
+    "publish:dry-run": "npm publish --dry-run",
+    "publish:npm": "npm publish --access public",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "version:bump": "npm version",
+    "version:major": "npm version major",
+    "version:minor": "npm version minor",
+    "version:patch": "npm version patch"
   },
   "devDependencies": {
     "@types/react": "^19.2.7",
