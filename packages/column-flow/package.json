@@ -19,6 +19,11 @@
   "sideEffects": [
     "**/*.css"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ilyabo/column-flow.git",
+    "directory": "packages/column-flow"
+  },
   "license": "MIT",
   "peerDependencies": {
     "react": ">=18",
