@@ -1,6 +1,6 @@
 {
   "name": "column-flow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A React component for supply chain visualizations and column-organized node-link graphs.",
   "type": "module",
   "main": "./dist/index.js",
@@ -14,7 +14,9 @@
     "./style.css": "./dist/column-flow.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE.md",
+    "README.md"
   ],
   "sideEffects": [
     "**/*.css"
