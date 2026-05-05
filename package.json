@@ -15,10 +15,10 @@
     "publish:npm": "npm publish --workspace column-flow --access public",
     "test": "turbo test",
     "typecheck": "turbo typecheck",
-    "version:bump": "npm version --workspace column-flow",
-    "version:major": "npm version major --workspace column-flow",
-    "version:minor": "npm version minor --workspace column-flow",
-    "version:patch": "npm version patch --workspace column-flow"
+    "version:bump": "node scripts/bump-version.mjs",
+    "version:major": "node scripts/bump-version.mjs major",
+    "version:minor": "node scripts/bump-version.mjs minor",
+    "version:patch": "node scripts/bump-version.mjs patch"
   },
   "devDependencies": {
     "@types/react": "^19.2.7",
