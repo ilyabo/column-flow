@@ -1,10 +1,10 @@
 # ColumnFlow
 
-Reusable React component for column-organized node-link graphs.
+Reusable React component for supply chain visualizations and other column-organized node-link graphs.
 
 <img width="1152" height="343" alt="image" src="https://github.com/user-attachments/assets/8c07fa01-829a-435b-9892-0e95a860cf3a" />
 
-ColumnFlow is useful for layered, multipartite, or staged relationship data where nodes belong to ordered columns and links connect nodes across those columns. It is visually related to Sankey diagrams, but it does not imply quantitative edge width.
+ColumnFlow is useful for supply chain maps, process networks, lineage views, and other layered or multipartite relationship data where nodes belong to ordered columns and links connect nodes across those columns. It is visually related to Sankey diagrams, but it does not imply quantitative edge width.
 
 ```tsx
 import {ColumnFlow} from "column-flow";
