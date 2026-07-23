@@ -1,0 +1,9 @@
+id,source,target,commodity
+farm_a-mill_a,farm_a,mill_a,Fresh fruit bunches
+farm_b-mill_a,farm_b,mill_a,Fresh fruit bunches
+farm_b-mill_b,farm_b,mill_b,Fresh fruit bunches
+mill_a-refinery_a,mill_a,refinery_a,Crude palm oil
+mill_b-refinery_a,mill_b,refinery_a,Crude palm oil
+refinery_a-trader_a,refinery_a,trader_a,Refined palm oil
+trader_a-brand_a,trader_a,brand_a,Refined palm oil
+trader_a-brand_b,trader_a,brand_b,Refined palm oil
